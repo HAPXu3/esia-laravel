@@ -9,6 +9,7 @@ use Esia\OpenId;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Two\AbstractProvider;
 use Laravel\Socialite\Two\ProviderInterface;
+use Laravel\Socialite\Two\User;
 
 class EsiaSocialiteProvider extends AbstractProvider implements ProviderInterface
 {
@@ -25,12 +26,24 @@ class EsiaSocialiteProvider extends AbstractProvider implements ProviderInterfac
      * @param $clientSecret
      * @param $redirectUrl
      * @param array $certParams
+     * @param array $scope
      * @param array $guzzle
+     * @param bool $isTest
      * @throws InvalidConfigurationException
      */
-    public function __construct(Request $request, $clientId, $clientSecret, $redirectUrl, array $certParams, $guzzle = [])
-    {
+    public function __construct(
+        Request $request,
+        $clientId,
+        $clientSecret,
+        $redirectUrl,
+        array $certParams,
+        array $scope,
+        bool $isTest = true,
+        $guzzle = []
+    ) {
         parent::__construct($request, $clientId, $clientSecret, $redirectUrl, $guzzle);
+        $this->isTest = $isTest;
+        $this->scopes = $scope;
 
         $this->esia = new OpenId($this->makeConfig($certParams['privateKeyPath'], $certParams['certPath']));
         $this->esia->setSigner($this->makeSigner($certParams));
@@ -58,10 +71,11 @@ class EsiaSocialiteProvider extends AbstractProvider implements ProviderInterfac
 
     /**
      * @inheritDoc
+     * @throws AbstractEsiaException
      */
     protected function getUserByToken($token)
     {
-        // TODO: Implement getUserByToken() method.
+        return $this->esia->getPersonInfo() + ['oid' => $this->esia->getConfig()->getOid()];
     }
 
     /**
@@ -69,15 +83,10 @@ class EsiaSocialiteProvider extends AbstractProvider implements ProviderInterfac
      */
     protected function mapUserToObject(array $user)
     {
-        // TODO: Implement mapUserToObject() method.
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function user()
-    {
-        // TODO: Implement user() method.
+        return (new User)->setRaw($user)->map([
+            'id' => $user['oid'],
+            'name' => $user['lastName'] . ' ' . $user['firstName'] . ' ' . $user['middleName'],
+        ]);
     }
 
     /**
@@ -86,7 +95,14 @@ class EsiaSocialiteProvider extends AbstractProvider implements ProviderInterfac
      */
     public function getAccessTokenResponse($code)
     {
-        return ['access_token' => $this->esia->getToken($code)];
+        $token = $this->esia->getToken($code);
+        $payload = json_decode($this->base64UrlSafeDecode(explode('.', $token)[1]), true);
+
+        return [
+            'access_token' => $token,
+            'expires_in' => $payload['exp'],
+            'refresh_token' => null,
+        ];
     }
 
     /**
@@ -117,5 +133,17 @@ class EsiaSocialiteProvider extends AbstractProvider implements ProviderInterfac
             $params['privateKeyPassword'],
             $params['tmpPath']
         );
+    }
+
+    /**
+     * Url safe for base64
+     * @param string $string
+     * @return string
+     */
+    private function base64UrlSafeDecode(string $string): string
+    {
+        $base64 = strtr($string, '-_', '+/');
+
+        return base64_decode($base64);
     }
 }
