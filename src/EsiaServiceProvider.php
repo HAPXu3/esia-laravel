@@ -16,7 +16,25 @@ class EsiaServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->bind(EsiaSocialiteProvider::class, function (Container $container) {
+            $config = $container->make('config');
 
+            return new EsiaSocialiteProvider(
+                $container->make('request'),
+                $config->get('esia.clientId'),
+                '',
+                $config->get('esia.redirectUrl'),
+                [
+                    'signer' => $config->get('esia.signer'),
+                    'certPath' => $config->get('esia.certPath'),
+                    'privateKeyPath' => $config->get('esia.privateKeyPath'),
+                    'privateKeyPassword' => $config->get('esia.privateKeyPassword'),
+                    'tmpPath' => $config->get('esia.tmpPath'),
+                ],
+                $config->get('esia.scope'),
+                $config->get('esia.test')
+            );
+        });
     }
 
     /**
@@ -31,21 +49,7 @@ class EsiaServiceProvider extends ServiceProvider
         ], 'esia');
 
         Socialite::extend('esia', function (Container $container) {
-            $config = $container->make('config');
-            $provider = new EsiaSocialiteProvider(
-                $container->make('request'),
-                $config->get('esia.clientId'),
-                '',
-                $config->get('esia.redirectUrl'),
-                [
-                    'signer' => $config->get('esia.signer'),
-                    'certPath' => $config->get('esia.certPath'),
-                    'privateKeyPath' => $config->get('esia.privateKeyPath'),
-                    'privateKeyPassword' => $config->get('esia.privateKeyPassword'),
-                    'tmpPath' => $config->get('esia.tmpPath'),
-                ]
-            );
-            return $provider->scopes($config->get('esia.scope'));
+            return $container->make(EsiaSocialiteProvider::class);
         });
     }
 }
