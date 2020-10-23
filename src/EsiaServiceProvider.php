@@ -45,7 +45,7 @@ class EsiaServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([
-            __DIR__ . './config/esia.php' => config_path('esia.php'),
+            __DIR__ . '/config/esia.php' => config_path('esia.php'),
         ], 'esia');
 
         Socialite::extend('esia', function (Container $container) {
