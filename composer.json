@@ -16,7 +16,8 @@
         "fr05t1k/esia": "^2.0",
         "laravel/socialite": "^5.0",
         "guzzlehttp/guzzle": "^6.0",
-        "illuminate/support": "^6.0"
+        "illuminate/support": "^5.8 || ^6.0 || ^7.0 || ^8.0",
+        "ext-json": "*"
     },
     "extra": {
         "laravel": {
