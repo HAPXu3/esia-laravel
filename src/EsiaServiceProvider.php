@@ -2,7 +2,7 @@
 
 namespace hapxu3\Esia;
 
-use hapxu3\Esia\Socialite\EsiaSocialiteProvider;
+use Hapxu3\Esia\Socialite\EsiaSocialiteProvider;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Socialite\Facades\Socialite;

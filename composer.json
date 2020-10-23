@@ -22,13 +22,13 @@
     "extra": {
         "laravel": {
             "providers": [
-                "hapxu3\\Esia\\EsiaServiceProvider"
+                "Hapxu3\\Esia\\EsiaServiceProvider"
             ]
         }
     },
     "autoload": {
         "psr-4": {
-            "hapxu3\\Esia\\": "src"
+            "Hapxu3\\Esia\\": "src"
         }
     }
 }
