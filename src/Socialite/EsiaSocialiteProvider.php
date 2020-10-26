@@ -6,6 +6,7 @@ use Esia\Config;
 use Esia\Exceptions\AbstractEsiaException;
 use Esia\Exceptions\InvalidConfigurationException;
 use Esia\OpenId;
+use Esia\Signer\Exceptions\SignFailException;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Two\AbstractProvider;
 use Laravel\Socialite\Two\ProviderInterface;
@@ -145,5 +146,14 @@ class EsiaSocialiteProvider extends AbstractProvider implements ProviderInterfac
         $base64 = strtr($string, '-_', '+/');
 
         return base64_decode($base64);
+    }
+
+    /**
+     * @return string
+     * @throws SignFailException
+     */
+    public function buildUrl(): string
+    {
+        return $this->esia->buildUrl();
     }
 }
